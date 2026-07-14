@@ -232,7 +232,7 @@ class SolarQuote(models.Model):
         self.sale_order_id = sale_order.id
 
         # 2. Generar el PDF usando el motor de reportes de Odoo
-        report_template_id = 'cotizador_solar.action_report_solar_proposal'
+        report_template_id = 'cotizador-solar.action_report_solar_proposal'
         pdf_content, content_type = self.env['ir.actions.report']._render_qweb_pdf(report_template_id, res_ids=self.ids)
 
         # 3. Crear el adjunto en Odoo
