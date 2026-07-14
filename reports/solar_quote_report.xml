@@ -4,8 +4,8 @@
         <field name="name">Propuesta Técnica Solar</field>
         <field name="model">solar.quote</field>
         <field name="report_type">qweb-pdf</field>
-        <field name="report_name">cotizador-solar.report_solar_proposal_template</field>
-        <field name="report_file">cotizador-solar.report_solar_proposal_template</field>
+        <field name="report_name">cotizador_solar.report_solar_proposal_template</field>
+        <field name="report_file">cotizador_solar.report_solar_proposal_template</field>
         <field name="binding_model_id" ref="model_solar_quote"/>
         <field name="binding_type">report</field>
     </record>

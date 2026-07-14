@@ -17,7 +17,7 @@
     'support': "ventas@mbaconsultings.com",
     'license': "AGPL-3",
     'category': 'Sales',
-    'version': '18.0.1.0.3',
+    'version': '18.0.1.0.4',
     'depends': ['base', 'sale', 'mail'],
     'data': [
         'security/security.xml',
@@ -28,7 +28,7 @@
     ],
     'assets': {
         'web.assets_backend': [
-            'cotizador-solar/static/src/css/cotizador_solar.css',
+            'cotizador_solar/static/src/css/cotizador_solar.css',
         ],
     },
     'installable': True,

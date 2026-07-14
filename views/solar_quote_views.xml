@@ -219,7 +219,7 @@
     <menuitem id="menu_solar_root" 
               name="Cotizador Solar" 
               sequence="25" 
-              web_icon="cotizador-solar,static/description/icon.png"/>
+              web_icon="cotizador_solar,static/description/icon.png"/>
 
     <menuitem id="menu_solar_quote" 
               name="Cotizador Solar" 
