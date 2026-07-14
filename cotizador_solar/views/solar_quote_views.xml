@@ -93,6 +93,13 @@
                                     </group>
                                 </group>
                             </div>
+                            <group string="Inteligencia de Consumo (Demanda)" col="5">
+                                <field name="total_yearly_consumption"/>
+                                <field name="avg_monthly_consumption"/>
+                                <field name="avg_daily_consumption"/>
+                                <field name="peak_consumption"/>
+                                <field name="min_consumption"/>
+                            </group>
                         </page>
 
                         <page string="Configuración Técnica" name="technical_config">
@@ -123,6 +130,12 @@
                                     <field name="advanced_min_price"/>
                                 </group>
                             </group>
+
+                            <group string="Generación Mensual Estimada" col="3">
+                                <field name="generation_daily"/>
+                                <field name="generation_monthly"/>
+                                <field name="generation_yearly"/>
+                            </group>
                         </page>
 
                         <page string="Resultados de Dimensionamiento" name="calculations_results">
@@ -137,20 +150,6 @@
                                     <field name="investment" widget="monetary" class="oe_inline"/>
                                     <field name="cost_per_watt" widget="monetary" class="oe_inline"/>
                                     <field name="is_min_price_applied"/>
-                                </group>
-                            </group>
-                            <group>
-                                <group string="Generación Mensual Estimada">
-                                    <field name="generation_daily"/>
-                                    <field name="generation_monthly"/>
-                                    <field name="generation_yearly"/>
-                                </group>
-                                <group string="Inteligencia de Consumo (Demanda)">
-                                    <field name="total_yearly_consumption"/>
-                                    <field name="avg_monthly_consumption"/>
-                                    <field name="avg_daily_consumption"/>
-                                    <field name="peak_consumption"/>
-                                    <field name="min_consumption"/>
                                 </group>
                             </group>
                         </page>
