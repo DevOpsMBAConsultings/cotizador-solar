@@ -93,12 +93,16 @@
                                     </group>
                                 </group>
                             </div>
-                            <group string="Inteligencia de Consumo (Demanda)" col="5">
-                                <field name="total_yearly_consumption"/>
-                                <field name="avg_monthly_consumption"/>
-                                <field name="avg_daily_consumption"/>
-                                <field name="peak_consumption"/>
-                                <field name="min_consumption"/>
+                            <group string="Inteligencia de Consumo (Demanda)">
+                                <group>
+                                    <field name="total_yearly_consumption"/>
+                                    <field name="avg_monthly_consumption"/>
+                                    <field name="avg_daily_consumption"/>
+                                </group>
+                                <group>
+                                    <field name="peak_consumption"/>
+                                    <field name="min_consumption"/>
+                                </group>
                             </group>
                         </page>
 
@@ -131,10 +135,14 @@
                                 </group>
                             </group>
 
-                            <group string="Generación Mensual Estimada" col="3">
-                                <field name="generation_daily"/>
-                                <field name="generation_monthly"/>
-                                <field name="generation_yearly"/>
+                            <group string="Generación Mensual Estimada">
+                                <group>
+                                    <field name="generation_daily"/>
+                                    <field name="generation_monthly"/>
+                                </group>
+                                <group>
+                                    <field name="generation_yearly"/>
+                                </group>
                             </group>
                         </page>
 
