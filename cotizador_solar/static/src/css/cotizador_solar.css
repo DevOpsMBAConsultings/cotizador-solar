@@ -1,0 +1,96 @@
+/* Premium CSS for Solar Quote Module */
+
+.o_solar_quote_form {
+    background: linear-gradient(135deg, #111b27 0%, #0c101b 100%) !important;
+    color: #e2e8f0 !important;
+}
+
+.o_solar_quote_form .o_form_sheet {
+    background: rgba(18, 30, 49, 0.75) !important;
+    backdrop-filter: blur(12px) !important;
+    border: 1px solid rgba(255, 255, 255, 0.08) !important;
+    border-radius: 16px !important;
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3) !important;
+    padding: 2.5rem !important;
+    color: #e2e8f0 !important;
+}
+
+.o_solar_quote_form label, 
+.o_solar_quote_form .o_horizontal_separator {
+    color: #38bdf8 !important;
+    font-weight: 600 !important;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    font-size: 0.85rem;
+}
+
+.o_solar_quote_form input[type="text"], 
+.o_solar_quote_form input[type="number"], 
+.o_solar_quote_form select,
+.o_solar_quote_form .o_input {
+    background: rgba(15, 23, 42, 0.6) !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    color: #f8fafc !important;
+    border-radius: 8px !important;
+    padding: 0.5rem 0.75rem !important;
+    transition: all 0.3s ease;
+}
+
+.o_solar_quote_form input[type="text"]:focus, 
+.o_solar_quote_form input[type="number"]:focus, 
+.o_solar_quote_form select:focus {
+    border-color: #38bdf8 !important;
+    box-shadow: 0 0 0 2px rgba(56, 189, 248, 0.25) !important;
+    background: rgba(15, 23, 42, 0.85) !important;
+}
+
+.o_solar_quote_form .nav-tabs .nav-link {
+    color: #94a3b8 !important;
+    background: transparent !important;
+    border: none !important;
+    border-bottom: 2px solid transparent !important;
+    font-weight: 500 !important;
+    padding: 0.75rem 1.25rem !important;
+    transition: all 0.3s ease;
+}
+
+.o_solar_quote_form .nav-tabs .nav-link.active {
+    color: #38bdf8 !important;
+    border-bottom: 2px solid #38bdf8 !important;
+    font-weight: 600 !important;
+}
+
+.o_solar_quote_form .o_notebook {
+    margin-top: 1.5rem !important;
+}
+
+.o_solar_quote_form .oe_title h1 span,
+.o_solar_quote_form .oe_title h1 input {
+    color: #f8fafc !important;
+    font-weight: 700 !important;
+}
+
+/* Button Customization */
+.o_solar_quote_form .o_btn_generate_proposal {
+    background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%) !important;
+    border: none !important;
+    font-weight: 600 !important;
+    letter-spacing: 0.03em;
+    padding: 0.6rem 1.5rem !important;
+    border-radius: 8px !important;
+    box-shadow: 0 4px 12px rgba(2, 132, 199, 0.3) !important;
+    transition: all 0.2s ease !important;
+}
+
+.o_solar_quote_form .o_btn_generate_proposal:hover {
+    transform: translateY(-1px) !important;
+    box-shadow: 0 6px 16px rgba(2, 132, 199, 0.45) !important;
+}
+
+/* Results section highlighting */
+.o_solar_quote_form div[name="calculations_results"] {
+    background: rgba(15, 23, 42, 0.4) !important;
+    border-radius: 12px !important;
+    padding: 1rem !important;
+    border: 1px solid rgba(255, 255, 255, 0.05) !important;
+}

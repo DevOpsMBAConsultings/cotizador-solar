@@ -1,0 +1,256 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="report_solar_proposal_template">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="o">
+                <t t-call="web.external_layout">
+                    <div class="page" style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; color: #1e293b;">
+                        <!-- Custom Styles for PDF rendering -->
+                        <style>
+                            .proposal-title {
+                                color: #0284c7;
+                                font-size: 26px;
+                                font-weight: bold;
+                                border-bottom: 2px solid #e2e8f0;
+                                padding-bottom: 10px;
+                                margin-bottom: 20px;
+                            }
+                            .section-header {
+                                background-color: #f1f5f9;
+                                color: #0369a1;
+                                font-size: 16px;
+                                font-weight: bold;
+                                padding: 8px 12px;
+                                border-radius: 4px;
+                                margin-top: 25px;
+                                margin-bottom: 15px;
+                            }
+                            .card-metric {
+                                border: 1px solid #e2e8f0;
+                                border-radius: 6px;
+                                padding: 12px;
+                                text-align: center;
+                                background-color: #fafafa;
+                            }
+                            .metric-value {
+                                font-size: 18px;
+                                font-weight: bold;
+                                color: #0f172a;
+                            }
+                            .metric-label {
+                                font-size: 11px;
+                                color: #64748b;
+                                text-transform: uppercase;
+                            }
+                            .table-consumption {
+                                width: 100%;
+                                margin-top: 10px;
+                                border-collapse: collapse;
+                            }
+                            .table-consumption th {
+                                background-color: #0284c7;
+                                color: white;
+                                font-size: 11px;
+                                padding: 6px;
+                                text-align: center;
+                            }
+                            .table-consumption td {
+                                border: 1px solid #e2e8f0;
+                                padding: 6px;
+                                text-align: center;
+                                font-size: 11px;
+                            }
+                        </style>
+
+                        <!-- Header Info -->
+                        <div class="row">
+                            <div class="col-8">
+                                <h2 class="proposal-title">Propuesta Técnica Solar</h2>
+                            </div>
+                            <div class="col-4 text-right">
+                                <h5 style="color: #64748b; margin-top: 10px;">Ref: <t t-esc="o.name"/></h5>
+                                <p style="font-size: 12px; color: #94a3b8;">Fecha: <span t-field="o.create_date" t-options='{"widget": "date"}'/></p>
+                            </div>
+                        </div>
+
+                        <!-- Client Details and Project Parameters -->
+                        <div class="row">
+                            <div class="col-6">
+                                <div class="section-header">Información del Cliente</div>
+                                <table class="table table-sm table-borderless" style="font-size: 13px;">
+                                    <tr>
+                                        <td style="font-weight: bold; width: 30%;">Cliente:</td>
+                                        <td><span t-field="o.partner_id.name"/></td>
+                                    </tr>
+                                    <tr>
+                                        <td style="font-weight: bold;">Ubicación:</td>
+                                        <td><span t-field="o.ubicacion"/></td>
+                                    </tr>
+                                    <tr t-if="o.medidor">
+                                        <td style="font-weight: bold;">Medidor:</td>
+                                        <td><span t-field="o.medidor"/></td>
+                                    </tr>
+                                    <tr t-if="o.nac">
+                                        <td style="font-weight: bold;">NAC:</td>
+                                        <td><span t-field="o.nac"/></td>
+                                    </tr>
+                                </table>
+                            </div>
+                            <div class="col-6">
+                                <div class="section-header">Parámetros de Diseño</div>
+                                <table class="table table-sm table-borderless" style="font-size: 13px;">
+                                    <tr>
+                                        <td style="font-weight: bold; width: 45%;">Modo Cálculo:</td>
+                                        <td>
+                                            <span t-if="o.mode == 'quick'">Modo Rápido</span>
+                                            <span t-if="o.mode == 'advanced'">Modo Avanzado</span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td style="font-weight: bold;">Radiación (HSP):</td>
+                                        <td>
+                                            <span t-if="o.mode == 'quick'" t-field="o.quick_hsp"/>
+                                            <span t-if="o.mode == 'advanced'" t-field="o.advanced_hsp"/>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td style="font-weight: bold;">Potencia de Panel:</td>
+                                        <td>
+                                            <span t-if="o.mode == 'quick'"><t t-esc="o.quick_panel_watts"/> W</span>
+                                            <span t-if="o.mode == 'advanced'"><t t-esc="o.advanced_panel_watts"/> W</span>
+                                        </td>
+                                    </tr>
+                                    <tr t-if="o.mode == 'advanced'">
+                                        <td style="font-weight: bold;">Eficiencia Sistema:</td>
+                                        <td><span t-field="o.advanced_efficiency"/>%</td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- Core Metrics Row -->
+                        <div class="section-header">Resumen de la Solución Propuesta</div>
+                        <div class="row">
+                            <div class="col-3">
+                                <div class="card-metric">
+                                    <div class="metric-value"><span t-field="o.plant_size" t-options='{"widget": "float", "precision": 2}'/> kWp</div>
+                                    <div class="metric-label">Tamaño Planta</div>
+                                </div>
+                            </div>
+                            <div class="col-3">
+                                <div class="card-metric">
+                                    <div class="metric-value"><span t-field="o.panel_count"/> Módulos</div>
+                                    <div class="metric-label">Total Paneles</div>
+                                </div>
+                            </div>
+                            <div class="col-3">
+                                <div class="card-metric">
+                                    <div class="metric-value" style="color: #0284c7;"><span t-field="o.coverage" t-options='{"widget": "float", "precision": 0}'/>%</div>
+                                    <div class="metric-label">Cobertura</div>
+                                </div>
+                            </div>
+                            <div class="col-3">
+                                <div class="card-metric" style="background-color: #f0fdf4; border-color: #bbf7d0;">
+                                    <div class="metric-value" style="color: #15803d;"><span t-field="o.investment" t-options='{"widget": "monetary", "display_currency": o.env.company.currency_id}'/></div>
+                                    <div class="metric-label" style="color: #166534;">Inversión Est.</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Generation & Economics -->
+                        <div class="row mt-4">
+                            <div class="col-6">
+                                <div class="section-header">Proyección de Generación Eléctrica</div>
+                                <table class="table table-sm" style="font-size: 12px;">
+                                    <tr>
+                                        <td>Generación Diaria Estimada:</td>
+                                        <td class="text-right" style="font-weight: bold;"><span t-field="o.generation_daily" t-options='{"widget": "float", "precision": 1}'/> kWh</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Generación Mensual Estimada:</td>
+                                        <td class="text-right" style="font-weight: bold;"><span t-field="o.generation_monthly" t-options='{"widget": "integer"}'/> kWh</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Generación Anual Estimada:</td>
+                                        <td class="text-right" style="font-weight: bold;"><span t-field="o.generation_yearly" t-options='{"widget": "integer"}'/> kWh</td>
+                                    </tr>
+                                </table>
+                            </div>
+                            <div class="col-6">
+                                <div class="section-header">Análisis de Costos</div>
+                                <table class="table table-sm" style="font-size: 12px;">
+                                    <tr>
+                                        <td>Costo de Inversión por Watt:</td>
+                                        <td class="text-right" style="font-weight: bold;"><span t-field="o.cost_per_watt" t-options='{"widget": "monetary", "display_currency": o.env.company.currency_id}'/>/W</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Precio Mínimo de Solución:</td>
+                                        <td class="text-right"><span t-if="o.mode == 'quick'" t-field="o.quick_min_price" t-options='{"widget": "monetary", "display_currency": o.env.company.currency_id}'/><span t-if="o.mode == 'advanced'" t-field="o.advanced_min_price" t-options='{"widget": "monetary", "display_currency": o.env.company.currency_id}'/></td>
+                                    </tr>
+                                    <tr>
+                                        <td>Ajuste por Precio Mínimo:</td>
+                                        <td class="text-right" style="font-weight: bold;">
+                                            <span t-if="o.is_min_price_applied" class="badge badge-warning" style="background-color: #fef3c7; color: #d97706; padding: 3px 6px;">Aplicado</span>
+                                            <span t-if="not o.is_min_price_applied" class="badge badge-success" style="background-color: #dcfce7; color: #15803d; padding: 3px 6px;">No Aplicado</span>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- Historical Consumption Table -->
+                        <div class="section-header">Historial de Consumos Eléctricos Registrados (kWh)</div>
+                        <table class="table-consumption">
+                            <thead>
+                                <tr>
+                                    <th>M1</th>
+                                    <th>M2</th>
+                                    <th>M3</th>
+                                    <th>M4</th>
+                                    <th>M5</th>
+                                    <th>M6</th>
+                                    <th>M7</th>
+                                    <th>M8</th>
+                                    <th>M9</th>
+                                    <th>M10</th>
+                                    <th>M11</th>
+                                    <th>M12</th>
+                                    <th style="background-color: #0369a1;">Total</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><t t-esc="int(o.consumption_m1)"/></td>
+                                    <td><t t-esc="int(o.consumption_m2)"/></td>
+                                    <td><t t-esc="int(o.consumption_m3)"/></td>
+                                    <td><t t-esc="int(o.consumption_m4)"/></td>
+                                    <td><t t-esc="int(o.consumption_m5)"/></td>
+                                    <td><t t-esc="int(o.consumption_m6)"/></td>
+                                    <td><t t-esc="int(o.consumption_m7)"/></td>
+                                    <td><t t-esc="int(o.consumption_m8)"/></td>
+                                    <td><t t-esc="int(o.consumption_m9)"/></td>
+                                    <td><t t-esc="int(o.consumption_m10)"/></td>
+                                    <td><t t-esc="int(o.consumption_m11)"/></td>
+                                    <td><t t-esc="int(o.consumption_m12)"/></td>
+                                    <td style="font-weight: bold; background-color: #f1f5f9;"><t t-esc="int(o.total_yearly_consumption)"/></td>
+                                </tr>
+                            </tbody>
+                        </table>
+
+                        <!-- Demand metrics -->
+                        <div class="row mt-3" style="font-size: 11px; color: #64748b;">
+                            <div class="col-4">Consumo Diario Promedio: <strong><span t-field="o.avg_daily_consumption" t-options='{"widget": "float", "precision": 1}'/> kWh</strong></div>
+                            <div class="col-4">Consumo Mensual Promedio: <strong><span t-field="o.avg_monthly_consumption" t-options='{"widget": "integer"}'/> kWh</strong></div>
+                            <div class="col-4 text-right">Pico de Demanda: <strong><span t-field="o.peak_consumption" t-options='{"widget": "integer"}'/> kWh</strong></div>
+                        </div>
+
+                        <!-- Footer Legal / Info -->
+                        <div style="margin-top: 50px; border-top: 1px solid #e2e8f0; padding-top: 10px; font-size: 10px; color: #94a3b8;" class="text-center">
+                            Esta es una propuesta preliminar calculada a partir de los datos históricos proporcionados. Los valores reales pueden variar según la radiación solar efectiva y la instalación física.
+                        </div>
+                    </div>
+                </t>
+            </t>
+        </t>
+    </template>
+</odoo>

@@ -1,0 +1,3 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_solar_quote_user,access_solar_quote_user,model_solar_quote,group_solar_user,1,1,1,1
+access_solar_quote_manager,access_solar_quote_manager,model_solar_quote,group_solar_manager,1,1,1,1

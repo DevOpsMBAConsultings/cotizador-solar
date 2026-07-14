@@ -1,0 +1,227 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Vista List (Tree) de Cotizaciones -->
+    <record id="view_solar_quote_tree" model="ir.ui.view">
+        <field name="name">solar.quote.tree</field>
+        <field name="model">solar.quote</field>
+        <field name="arch" type="xml">
+            <list string="Cotizaciones Solares">
+                <field name="name"/>
+                <field name="partner_id"/>
+                <field name="ubicacion"/>
+                <field name="mode"/>
+                <field name="plant_size" sum="Total kWp" widget="float"/>
+                <field name="panel_count" sum="Total Paneles"/>
+                <field name="investment" sum="Total Inversión" widget="monetary"/>
+                <field name="coverage" widget="percentage_raw" avg="Cobertura Promedio"/>
+                <field name="create_date" string="Fecha Creación"/>
+                <field name="sale_order_id" string="Pedido Venta"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- Vista Formulario de Cotizaciones -->
+    <record id="view_solar_quote_form" model="ir.ui.view">
+        <field name="name">solar.quote.form</field>
+        <field name="model">solar.quote</field>
+        <field name="arch" type="xml">
+            <form string="Cotización Solar" class="o_solar_quote_form">
+                <header>
+                    <button name="action_generate_proposal" 
+                            type="object" 
+                            string="Generar Propuesta" 
+                            class="btn-primary o_btn_generate_proposal"
+                            icon="fa-file-pdf-o"/>
+                    <button name="action_auto_size_advanced"
+                            type="object"
+                            string="Auto-Ajustar (100% Cobertura)"
+                            class="btn-secondary"
+                            invisible="mode != 'advanced'"
+                            icon="fa-magic"/>
+                </header>
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="action_generate_proposal" type="object" class="oe_stat_button" icon="fa-usd" invisible="not sale_order_id">
+                            <div class="o_field_widget o_stat_info">
+                                <span class="o_stat_text">Pedido Venta</span>
+                                <field name="sale_order_id" readonly="1" class="o_stat_value"/>
+                            </div>
+                        </button>
+                    </div>
+                    <div class="oe_title">
+                        <label for="name"/>
+                        <h1>
+                            <field name="name" readonly="1"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group string="Datos del Cliente">
+                            <field name="partner_id" widget="res_partner_many2one" placeholder="Seleccione un contacto..."/>
+                            <field name="ubicacion" placeholder="Provincia, Ciudad, Dirección..."/>
+                            <field name="medidor" placeholder="No. de Medidor de luz"/>
+                            <field name="nac" placeholder="No. de NAC de la cuenta"/>
+                        </group>
+                        <group string="Parámetros de Cálculo">
+                            <field name="mode" widget="radio" options="{'horizontal': true}"/>
+                            <label for="start_month" string="Periodo Consumo"/>
+                            <div class="o_row">
+                                <field name="start_month" class="oe_inline"/>
+                                <field name="start_year" class="oe_inline" placeholder="Año"/>
+                            </div>
+                        </group>
+                    </group>
+
+                    <notebook>
+                        <page string="Historial de Consumo (kWh)" name="consumption_history">
+                            <div class="o_solar_consumption_grid">
+                                <group>
+                                    <group string="Primeros 6 Meses">
+                                        <field name="consumption_m1"/>
+                                        <field name="consumption_m2"/>
+                                        <field name="consumption_m3"/>
+                                        <field name="consumption_m4"/>
+                                        <field name="consumption_m5"/>
+                                        <field name="consumption_m6"/>
+                                    </group>
+                                    <group string="Siguientes 6 Meses">
+                                        <field name="consumption_m7"/>
+                                        <field name="consumption_m8"/>
+                                        <field name="consumption_m9"/>
+                                        <field name="consumption_m10"/>
+                                        <field name="consumption_m11"/>
+                                        <field name="consumption_m12"/>
+                                    </group>
+                                </group>
+                            </div>
+                        </page>
+
+                        <page string="Configuración Técnica" name="technical_config">
+                            <!-- Parámetros en Modo Rápido -->
+                            <group invisible="mode != 'quick'" string="Ajustes Modo Rápido">
+                                <group>
+                                    <field name="quick_hsp"/>
+                                    <field name="quick_panel_watts"/>
+                                    <field name="quick_min_panels"/>
+                                </group>
+                                <group>
+                                    <field name="quick_price"/>
+                                    <field name="quick_min_price"/>
+                                </group>
+                            </group>
+
+                            <!-- Parámetros en Modo Avanzado -->
+                            <group invisible="mode != 'advanced'" string="Ajustes Modo Avanzado">
+                                <group string="Parámetros Físicos">
+                                    <field name="advanced_hsp"/>
+                                    <field name="advanced_efficiency"/>
+                                    <field name="advanced_panel_watts"/>
+                                    <field name="advanced_panel_count"/>
+                                </group>
+                                <group string="Costos y Precios">
+                                    <field name="pricing_mode" widget="radio" options="{'horizontal': true}"/>
+                                    <field name="pricing_value"/>
+                                    <field name="advanced_min_price"/>
+                                </group>
+                            </group>
+                        </page>
+
+                        <page string="Resultados de Dimensionamiento" name="calculations_results">
+                            <group>
+                                <group string="Dimensiones del Sistema">
+                                    <field name="plant_size" class="oe_inline"/>
+                                    <field name="panel_count" class="oe_inline"/>
+                                    <field name="coverage" widget="percentage" class="oe_inline"/>
+                                    <field name="is_min_plant_applied"/>
+                                </group>
+                                <group string="Inversión Estimada">
+                                    <field name="investment" widget="monetary" class="oe_inline"/>
+                                    <field name="cost_per_watt" widget="monetary" class="oe_inline"/>
+                                    <field name="is_min_price_applied"/>
+                                </group>
+                            </group>
+                            <group>
+                                <group string="Generación Mensual Estimada">
+                                    <field name="generation_daily"/>
+                                    <field name="generation_monthly"/>
+                                    <field name="generation_yearly"/>
+                                </group>
+                                <group string="Inteligencia de Consumo (Demanda)">
+                                    <field name="total_yearly_consumption"/>
+                                    <field name="avg_monthly_consumption"/>
+                                    <field name="avg_daily_consumption"/>
+                                    <field name="peak_consumption"/>
+                                    <field name="min_consumption"/>
+                                </group>
+                            </group>
+                        </page>
+                    </notebook>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <!-- Vista de Búsqueda (Search) -->
+    <record id="view_solar_quote_search" model="ir.ui.view">
+        <field name="name">solar.quote.search</field>
+        <field name="model">solar.quote</field>
+        <field name="arch" type="xml">
+            <search string="Buscar Cotización Solar">
+                <field name="name"/>
+                <field name="partner_id"/>
+                <field name="ubicacion"/>
+                <field name="medidor"/>
+                <field name="nac"/>
+                <filter string="Modo Rápido" name="mode_quick" domain="[('mode', '=', 'quick')]"/>
+                <filter string="Modo Avanzado" name="mode_advanced" domain="[('mode', '=', 'advanced')]"/>
+                <group expand="0" string="Agrupar por">
+                    <filter string="Cliente" name="group_by_partner" context="{'group_by': 'partner_id'}"/>
+                    <filter string="Modo de Cálculo" name="group_by_mode" context="{'group_by': 'mode'}"/>
+                    <filter string="Ubicación" name="group_by_ubicacion" context="{'group_by': 'ubicacion'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- Secuencia para la Referencia Única de Cotizaciones -->
+    <record id="seq_solar_quote" model="ir.sequence">
+        <field name="name">Secuencia de Cotización Solar</field>
+        <field name="code">solar.quote</field>
+        <field name="prefix">SOLAR/%(range_year)s/</field>
+        <field name="padding">4</field>
+        <field name="company_id" eval="False"/>
+    </record>
+
+    <!-- Acción de Ventana para el Cotizador -->
+    <record id="action_solar_quote" model="ir.actions.act_window">
+        <field name="name">Cotizador Solar</field>
+        <field name="res_model">solar.quote</field>
+        <field name="view_mode">list,form</field>
+        <field name="search_view_id" ref="view_solar_quote_search"/>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Cree su primera propuesta de dimensionamiento solar.
+            </p>
+            <p>
+                Rellene el historial de consumo eléctrico del cliente de 12 meses y obtenga al instante la potencia pico y los módulos necesarios.
+            </p>
+        </field>
+    </record>
+
+    <!-- Menús en Odoo -->
+    <menuitem id="menu_solar_root" 
+              name="Cotizador Solar" 
+              sequence="25" 
+              web_icon="cotizador_solar,static/description/icon.png"/>
+
+    <menuitem id="menu_solar_quote" 
+              name="Cotizador Solar" 
+              parent="menu_solar_root" 
+              sequence="10"/>
+
+    <menuitem id="menu_solar_quote_action" 
+              name="Cotizaciones" 
+              parent="menu_solar_quote" 
+              action="action_solar_quote" 
+              sequence="10"/>
+</odoo>
