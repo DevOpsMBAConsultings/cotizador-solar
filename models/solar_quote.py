@@ -141,8 +141,8 @@ class SolarQuote(models.Model):
 
             if rec.mode == 'quick':
                 hsp = rec.quick_hsp or 3.5
-                price_per_watt = rec.quick_price or 0.75
-                min_price = rec.quick_min_price
+                price_per_watt = rec.quick_price or rec._default_quick_price()
+                min_price = rec.quick_min_price or rec._default_quick_min_price()
                 p_watts = rec.quick_panel_watts or 590.0
                 min_panels = rec.quick_min_panels or 8
                 min_plant_size = (min_panels * p_watts) / 1000.0
