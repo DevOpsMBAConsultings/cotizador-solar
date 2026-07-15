@@ -12,12 +12,12 @@
                         <setting id="solar_pricing_setting" string="Valores Racionales Rápidos" help="Configure los valores por defecto que tomará el cotizador solar en Modo Rápido.">
                             <div class="content-group">
                                 <div class="row mt16">
-                                    <label for="default_quick_price" class="col-lg-4 o_light_label"/>
-                                    <field name="default_quick_price" class="oe_inline"/>
+                                    <label for="solar_quick_price" class="col-lg-4 o_light_label"/>
+                                    <field name="solar_quick_price" class="oe_inline"/>
                                 </div>
                                 <div class="row mt16">
-                                    <label for="default_quick_min_price" class="col-lg-4 o_light_label"/>
-                                    <field name="default_quick_min_price" class="oe_inline"/>
+                                    <label for="solar_quick_min_price" class="col-lg-4 o_light_label"/>
+                                    <field name="solar_quick_min_price" class="oe_inline"/>
                                 </div>
                             </div>
                         </setting>
