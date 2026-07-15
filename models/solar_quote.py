@@ -232,38 +232,13 @@ class SolarQuote(models.Model):
         if not self.partner_id:
             raise UserError(_("Por favor, seleccione un cliente antes de generar la propuesta."))
 
-        # 1. Crear el presupuesto de venta (sale.order) vacío
-        sale_order = self.env['sale.order'].create({
-            'partner_id': self.partner_id.id,
-            'origin': self.name,
-        })
-        self.sale_order_id = sale_order.id
-
-        # 2. Generar el PDF usando el motor de reportes de Odoo
-        report_template_id = 'cotizador_solar.action_report_solar_proposal'
-        pdf_content, content_type = self.env['ir.actions.report']._render_qweb_pdf(report_template_id, res_ids=self.ids)
-
-        # 3. Crear el adjunto en Odoo
-        attachment = self.env['ir.attachment'].create({
-            'name': f'Propuesta_Solar_{self.partner_id.name}_{fields.Date.today()}.pdf',
-            'type': 'binary',
-            'datas': base64.b64encode(pdf_content),
-            'res_model': 'sale.order',
-            'res_id': sale_order.id,
-            'mimetype': 'application/pdf',
-        })
-
-        # 4. Registrar en el chatter de la cotización de venta
-        sale_order.message_post(
-            body=_("Propuesta técnica y económica de solución solar adjuntada automáticamente desde el Cotizador Solar (Ref: %s).", self.name),
-            attachment_ids=[attachment.id]
-        )
-
-        # 5. Redireccionar al usuario a la vista de formulario del pedido de venta
         return {
+            'name': _('Generar Propuesta'),
             'type': 'ir.actions.act_window',
-            'res_model': 'sale.order',
-            'res_id': sale_order.id,
+            'res_model': 'solar.quote.proposal.wizard',
             'view_mode': 'form',
-            'target': 'current',
+            'target': 'new',
+            'context': {
+                'default_solar_quote_id': self.id,
+            }
         }
