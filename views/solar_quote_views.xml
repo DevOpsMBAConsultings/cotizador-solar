@@ -30,7 +30,7 @@
                     <button name="action_generate_proposal" 
                             type="object" 
                             string="Generar Propuesta" 
-                            class="btn-primary o_btn_generate_proposal"
+                            class="oe_highlight"
                             icon="fa-file-pdf-o"/>
                     <button name="action_auto_size_advanced"
                             type="object"
