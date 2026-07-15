@@ -145,7 +145,7 @@
                             </div>
                             <div class="col-3">
                                 <div class="card-metric">
-                                    <div class="metric-value" style="color: #0284c7;"><span t-field="o.coverage" t-options='{"widget": "float", "precision": 0}'/>%</div>
+                                    <div class="metric-value" style="color: #0284c7;"><t t-esc="int(o.coverage * 100)"/>%</div>
                                     <div class="metric-label">Cobertura</div>
                                 </div>
                             </div>

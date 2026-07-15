@@ -205,7 +205,7 @@ class SolarQuote(models.Model):
                     rec.cost_per_watt = 0.0
                 rec.is_min_plant_applied = False
 
-            rec.coverage = (rec.generation_yearly / rec.total_yearly_consumption) * 100.0 if rec.total_yearly_consumption > 0 else 0.0
+            rec.coverage = (rec.generation_yearly / rec.total_yearly_consumption) if rec.total_yearly_consumption > 0 else 0.0
 
     def action_auto_size_advanced(self):
         """Ajusta automáticamente el número de paneles en Modo Avanzado para cubrir el 100% del consumo."""
