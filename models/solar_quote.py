@@ -28,18 +28,18 @@ class SolarQuote(models.Model):
     start_year = fields.Integer(string='Año Inicio', default=lambda self: fields.Date.today().year, required=True)
 
     # Consumos mensuales
-    consumption_m1 = fields.Float(string='Mes 1', default=0.0)
-    consumption_m2 = fields.Float(string='Mes 2', default=0.0)
-    consumption_m3 = fields.Float(string='Mes 3', default=0.0)
-    consumption_m4 = fields.Float(string='Mes 4', default=0.0)
-    consumption_m5 = fields.Float(string='Mes 5', default=0.0)
-    consumption_m6 = fields.Float(string='Mes 6', default=0.0)
-    consumption_m7 = fields.Float(string='Mes 7', default=0.0)
-    consumption_m8 = fields.Float(string='Mes 8', default=0.0)
-    consumption_m9 = fields.Float(string='Mes 9', default=0.0)
-    consumption_m10 = fields.Float(string='Mes 10', default=0.0)
-    consumption_m11 = fields.Float(string='Mes 11', default=0.0)
-    consumption_m12 = fields.Float(string='Mes 12', default=0.0)
+    consumption_m1 = fields.Integer(string='Mes 1', default=0)
+    consumption_m2 = fields.Integer(string='Mes 2', default=0)
+    consumption_m3 = fields.Integer(string='Mes 3', default=0)
+    consumption_m4 = fields.Integer(string='Mes 4', default=0)
+    consumption_m5 = fields.Integer(string='Mes 5', default=0)
+    consumption_m6 = fields.Integer(string='Mes 6', default=0)
+    consumption_m7 = fields.Integer(string='Mes 7', default=0)
+    consumption_m8 = fields.Integer(string='Mes 8', default=0)
+    consumption_m9 = fields.Integer(string='Mes 9', default=0)
+    consumption_m10 = fields.Integer(string='Mes 10', default=0)
+    consumption_m11 = fields.Integer(string='Mes 11', default=0)
+    consumption_m12 = fields.Integer(string='Mes 12', default=0)
 
     def _default_quick_price(self):
         val = self.env['ir.config_parameter'].sudo().get_param('cotizador_solar.default_quick_price')
@@ -69,11 +69,11 @@ class SolarQuote(models.Model):
     advanced_min_price = fields.Float(string='Precio Mínimo Avanzado', default=3500.0)
 
     # Resultados e Inteligencia de Consumo (Calculados)
-    total_yearly_consumption = fields.Float(string='Consumo Total (Año)', compute='_compute_consumption_stats', store=True)
-    avg_monthly_consumption = fields.Float(string='Consumo Mensual Promedio', compute='_compute_consumption_stats', store=True)
-    avg_daily_consumption = fields.Float(string='Consumo Diario Promedio', compute='_compute_consumption_stats', store=True)
-    peak_consumption = fields.Float(string='Consumo Pico (Max)', compute='_compute_consumption_stats', store=True)
-    min_consumption = fields.Float(string='Consumo Mínimo (Min)', compute='_compute_consumption_stats', store=True)
+    total_yearly_consumption = fields.Integer(string='Consumo Total (Año)', compute='_compute_consumption_stats', store=True)
+    avg_monthly_consumption = fields.Integer(string='Consumo Mensual Promedio', compute='_compute_consumption_stats', store=True)
+    avg_daily_consumption = fields.Integer(string='Consumo Diario Promedio', compute='_compute_consumption_stats', store=True)
+    peak_consumption = fields.Integer(string='Consumo Pico (Max)', compute='_compute_consumption_stats', store=True)
+    min_consumption = fields.Integer(string='Consumo Mínimo (Min)', compute='_compute_consumption_stats', store=True)
 
     # Resultados del Dimensionamiento
     plant_size = fields.Float(string='Tamaño de Planta (kWp)', compute='_compute_solar_calculations', store=True)
@@ -113,10 +113,10 @@ class SolarQuote(models.Model):
             ]
             total = sum(consumptions)
             rec.total_yearly_consumption = total
-            rec.avg_monthly_consumption = total / 12.0
-            rec.avg_daily_consumption = (total / 12.0) / 30.0
-            rec.peak_consumption = max(consumptions) if consumptions else 0.0
-            rec.min_consumption = min(consumptions) if consumptions else 0.0
+            rec.avg_monthly_consumption = int(round(total / 12.0))
+            rec.avg_daily_consumption = int(round((total / 12.0) / 30.0))
+            rec.peak_consumption = max(consumptions) if consumptions else 0
+            rec.min_consumption = min(consumptions) if consumptions else 0
 
     @api.depends(
         'mode', 'total_yearly_consumption', 'avg_daily_consumption', 'avg_monthly_consumption',
