@@ -41,10 +41,18 @@ class SolarQuote(models.Model):
     consumption_m11 = fields.Float(string='Mes 11', default=0.0)
     consumption_m12 = fields.Float(string='Mes 12', default=0.0)
 
+    def _default_quick_price(self):
+        val = self.env['ir.config_parameter'].sudo().get_param('cotizador_solar.default_quick_price')
+        return float(val) if val else 0.75
+
+    def _default_quick_min_price(self):
+        val = self.env['ir.config_parameter'].sudo().get_param('cotizador_solar.default_quick_min_price')
+        return float(val) if val else 3500.0
+
     # Configuración Rápida
     quick_hsp = fields.Float(string='Radiación (HSP) Rápida', default=3.5)
-    quick_price = fields.Float(string='Costo por Watt Rápido', default=0.75)
-    quick_min_price = fields.Float(string='Precio Mínimo Rápido', default=3500.0)
+    quick_price = fields.Float(string='Costo por Watt Rápido', default=_default_quick_price)
+    quick_min_price = fields.Float(string='Precio Mínimo Rápido', default=_default_quick_min_price)
     quick_panel_watts = fields.Float(string='Watts del Panel Rápido', default=590.0)
     quick_min_panels = fields.Integer(string='Cant. Mínima de Paneles', default=8)
 

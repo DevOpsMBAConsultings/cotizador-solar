@@ -231,4 +231,11 @@
               parent="menu_solar_quote" 
               action="action_solar_quote" 
               sequence="10"/>
+
+    <menuitem id="menu_solar_config"
+              name="Configuración"
+              parent="menu_solar_root"
+              action="action_solar_config_settings"
+              groups="group_solar_manager"
+              sequence="20"/>
 </odoo>

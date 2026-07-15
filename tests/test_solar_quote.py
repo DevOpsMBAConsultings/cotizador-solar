@@ -131,3 +131,19 @@ class TestSolarQuote(TransactionCase):
         self.assertEqual(action.get('type'), 'ir.actions.act_window')
         self.assertEqual(action.get('res_model'), 'sale.order')
         self.assertEqual(action.get('res_id'), sale_order.id)
+
+    def test_05_dynamic_default_settings(self):
+        """Verifica que los valores por defecto del cotizador se actualicen desde los parámetros del sistema."""
+        # 1. Configurar nuevos valores globales por defecto en ir.config_parameter
+        self.env['ir.config_parameter'].sudo().set_param('cotizador_solar.default_quick_price', '0.88')
+        self.env['ir.config_parameter'].sudo().set_param('cotizador_solar.default_quick_min_price', '4200.0')
+
+        # 2. Crear una nueva cotización solar sin pasar los campos de precio
+        quote = self.env['solar.quote'].create({
+            'partner_id': self.partner.id,
+            'mode': 'quick',
+        })
+
+        # 3. Validar que la cotización tome los valores por defecto dinámicos configurados
+        self.assertEqual(quote.quick_price, 0.88)
+        self.assertEqual(quote.quick_min_price, 4200.0)
