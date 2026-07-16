@@ -215,6 +215,37 @@
         </field>
     </record>
 
+    <!-- Formulario de Configuración Personalizado -->
+    <record id="view_solar_config_form" model="ir.ui.view">
+        <field name="name">solar.config.form</field>
+        <field name="model">solar.config</field>
+        <field name="arch" type="xml">
+            <form string="Configuración Cotizador Solar" create="false" delete="false">
+                <sheet>
+                    <div class="oe_title">
+                        <h1>Configuración de Valores de Referencia</h1>
+                    </div>
+                    <group>
+                        <group string="Valores por Defecto Racionales">
+                            <field name="quick_price"/>
+                            <field name="quick_min_price"/>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- Acción de Servidor para abrir el Singleton de Configuración -->
+    <record id="action_solar_config_server" model="ir.actions.server">
+        <field name="name">Configuración</field>
+        <field name="model_id" ref="model_solar_config"/>
+        <field name="state">code</field>
+        <field name="code">
+            action = model.action_open_config()
+        </field>
+    </record>
+
     <!-- Menús en Odoo -->
     <menuitem id="menu_solar_root" 
               name="Cotizador Solar" 
@@ -235,7 +266,7 @@
     <menuitem id="menu_solar_config"
               name="Configuración"
               parent="menu_solar_root"
-              action="action_solar_config_settings"
-              groups="group_solar_manager"
+              action="action_solar_config_server"
+              groups="cotizador_solar.group_solar_manager"
               sequence="20"/>
 </odoo>
