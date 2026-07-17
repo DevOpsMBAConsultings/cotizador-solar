@@ -118,6 +118,15 @@ class TestSolarQuote(TransactionCase):
         self.assertEqual(sale_order.partner_id, self.partner)
         self.assertEqual(sale_order.origin, quote.name)
 
+        # Verificar que el PDF esté adjunto al pedido de ventas
+        attachments = self.env['ir.attachment'].search([
+            ('res_model', '=', 'sale.order'),
+            ('res_id', '=', sale_order.id),
+        ])
+        self.assertEqual(len(attachments), 1)
+        self.assertTrue(attachments.datas)
+        self.assertTrue(attachments.name.endswith('.pdf'))
+
         # Verificar el formato de retorno de la acción
         self.assertEqual(action.get('type'), 'ir.actions.act_window')
         self.assertEqual(action.get('res_model'), 'sale.order')

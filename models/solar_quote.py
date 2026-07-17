@@ -260,6 +260,26 @@ class SolarQuote(models.Model):
 
         self.sale_order_id = sale_order.id
 
+        # Renderizar el PDF de la propuesta en memoria
+        report = self.env.ref('cotizador_solar.action_report_solar_proposal')
+        pdf_content, content_type = report._render_qweb_pdf(self.ids)
+
+        # Crear adjunto
+        attachment = self.env['ir.attachment'].create({
+            'name': f"Propuesta_Solar_{self.partner_id.name}_{fields.Date.today()}.pdf",
+            'type': 'binary',
+            'datas': base64.b64encode(pdf_content),
+            'res_model': 'sale.order',
+            'res_id': sale_order.id,
+            'mimetype': 'application/pdf',
+        })
+
+        # Adjuntar al chatter del pedido de venta
+        sale_order.message_post(
+            body=f"Propuesta técnica y económica de solución solar adjuntada automáticamente desde el Cotizador Solar (Ref: {self.name}).",
+            attachment_ids=[attachment.id]
+        )
+
         return {
             'type': 'ir.actions.act_window',
             'res_model': 'sale.order',
