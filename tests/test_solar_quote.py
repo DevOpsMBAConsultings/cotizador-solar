@@ -100,7 +100,7 @@ class TestSolarQuote(TransactionCase):
         self.assertEqual(quote.plant_size, 4.8) # 8 * 600 / 1000
 
     def test_04_action_generate_proposal(self):
-        """Verifica la generación de la propuesta en PDF y el Pedido de Ventas."""
+        """Verifica la generación del Pedido de Ventas."""
         quote = self.env['solar.quote'].create({
             'partner_id': self.partner.id,
             'mode': 'quick',
@@ -117,15 +117,6 @@ class TestSolarQuote(TransactionCase):
         sale_order = quote.sale_order_id
         self.assertEqual(sale_order.partner_id, self.partner)
         self.assertEqual(sale_order.origin, quote.name)
-
-        # Verificar que el PDF esté adjunto al pedido de ventas
-        attachments = self.env['ir.attachment'].search([
-            ('res_model', '=', 'sale.order'),
-            ('res_id', '=', sale_order.id),
-        ])
-        self.assertEqual(len(attachments), 1)
-        self.assertTrue(attachments.datas)
-        self.assertTrue(attachments.name.endswith('.pdf'))
 
         # Verificar el formato de retorno de la acción
         self.assertEqual(action.get('type'), 'ir.actions.act_window')
@@ -148,8 +139,8 @@ class TestSolarQuote(TransactionCase):
         self.assertEqual(quote.quick_price, 0.88)
         self.assertEqual(quote.quick_min_price, 4200.0)
 
-    def test_06_solar_config_custom_fields_and_wizard(self):
-        """Prueba los campos agregados a solar.config, su validación y la creación de líneas de presupuesto en el wizard."""
+    def test_06_solar_config_custom_fields_and_direct_generation(self):
+        """Prueba los campos agregados a solar.config, su validación y la creación de líneas de presupuesto directa."""
         # 1. Probar el decorador @api.constrains en solar.config
         config = self.env['solar.config'].get_config()
         
@@ -172,7 +163,7 @@ class TestSolarQuote(TransactionCase):
         })
         config.write({'product_id': product.id})
 
-        # 2. Probar la generación de la línea de presupuesto en el wizard
+        # 2. Probar la generación de la línea de presupuesto directa
         quote = self.env['solar.quote'].create({
             'partner_id': self.partner.id,
             'mode': 'quick',
@@ -184,17 +175,7 @@ class TestSolarQuote(TransactionCase):
         # Forzar el recálculo
         quote.flush_recordset()
 
-        # Crear plantilla de cotización de prueba si no existe
-        template = self.env['sale.order.template'].create({
-            'name': 'Plantilla Solar Test',
-        })
-
-        wizard = self.env['solar.quote.proposal.wizard'].create({
-            'solar_quote_id': quote.id,
-            'template_id': template.id,
-        })
-        
-        wizard.action_generate()
+        quote.action_generate_proposal()
 
         # Verificar que se creó el pedido y que contiene la línea esperada
         self.assertTrue(quote.sale_order_id)
@@ -206,5 +187,5 @@ class TestSolarQuote(TransactionCase):
         self.assertEqual(solar_line.product_uom_qty, 1.0)
         self.assertEqual(solar_line.price_unit, quote.investment)
         
-        expected_desc = f'Sistema Solar de {quote.plant_size} kWp con generación mensual de {quote.generation_monthly} kWh'
+        expected_desc = f'Sistema Solar de {quote.plant_size:.2f} kWp con generación mensual de {quote.generation_monthly:.2f} kWh'
         self.assertEqual(solar_line.name, expected_desc)

@@ -230,13 +230,37 @@ class SolarQuote(models.Model):
         if not self.partner_id:
             raise UserError(_("Por favor, seleccione un cliente antes de generar la propuesta."))
 
+        config = self.env['solar.config'].get_config()
+
+        # Crear el presupuesto de venta
+        sale_order = self.env['sale.order'].create({
+            'partner_id': self.partner_id.id,
+            'origin': self.name,
+        })
+
+        # Formatear a 2 decimales
+        plant_size_str = f"{self.plant_size:.2f}"
+        generation_monthly_str = f"{self.generation_monthly:.2f}"
+
+        description = config.description_template or ''
+        description = description.replace('[pppp]', plant_size_str)
+        description = description.replace('[gggg]', generation_monthly_str)
+
+        # Crear la línea del pedido de venta
+        self.env['sale.order.line'].create({
+            'order_id': sale_order.id,
+            'product_id': config.product_id.id,
+            'name': description,
+            'price_unit': self.investment,
+            'product_uom_qty': 1.0,
+        })
+
+        self.sale_order_id = sale_order.id
+
         return {
-            'name': _('Generar Propuesta'),
             'type': 'ir.actions.act_window',
-            'res_model': 'solar.quote.proposal.wizard',
+            'res_model': 'sale.order',
+            'res_id': sale_order.id,
             'view_mode': 'form',
-            'target': 'new',
-            'context': {
-                'default_solar_quote_id': self.id,
-            }
+            'target': 'current',
         }
