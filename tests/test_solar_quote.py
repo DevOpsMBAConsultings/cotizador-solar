@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from odoo.tests.common import TransactionCase
-from odoo.exceptions import UserError
+from odoo.exceptions import UserError, ValidationError
 
 class TestSolarQuote(TransactionCase):
 
@@ -147,3 +147,64 @@ class TestSolarQuote(TransactionCase):
         # 3. Validar que la cotización tome los valores por defecto dinámicos configurados
         self.assertEqual(quote.quick_price, 0.88)
         self.assertEqual(quote.quick_min_price, 4200.0)
+
+    def test_06_solar_config_custom_fields_and_wizard(self):
+        """Prueba los campos agregados a solar.config, su validación y la creación de líneas de presupuesto en el wizard."""
+        # 1. Probar el decorador @api.constrains en solar.config
+        config = self.env['solar.config'].get_config()
+        
+        # Debe fallar si no tiene [pppp] o [gggg]
+        with self.assertRaises(ValidationError):
+            config.write({'description_template': 'Plantilla sin etiquetas'})
+        with self.assertRaises(ValidationError):
+            config.write({'description_template': 'Plantilla con [pppp] pero no la otra'})
+        with self.assertRaises(ValidationError):
+            config.write({'description_template': 'Plantilla con [gggg] pero no la otra'})
+            
+        # Debe pasar si tiene ambos
+        config.write({'description_template': 'Sistema Solar de [pppp] kWp con generación mensual de [gggg] kWh'})
+        self.assertEqual(config.description_template, 'Sistema Solar de [pppp] kWp con generación mensual de [gggg] kWh')
+
+        # Asignar un producto de prueba
+        product = self.env['product.product'].create({
+            'name': 'Servicio de Instalación Solar Test',
+            'type': 'service',
+        })
+        config.write({'product_id': product.id})
+
+        # 2. Probar la generación de la línea de presupuesto en el wizard
+        quote = self.env['solar.quote'].create({
+            'partner_id': self.partner.id,
+            'mode': 'quick',
+            'consumption_m1': 500, 'consumption_m2': 500, 'consumption_m3': 500,
+            'consumption_m4': 500, 'consumption_m5': 500, 'consumption_m6': 500,
+            'consumption_m7': 500, 'consumption_m8': 500, 'consumption_m9': 500,
+            'consumption_m10': 500, 'consumption_m11': 500, 'consumption_m12': 500,
+        })
+        # Forzar el recálculo
+        quote.flush_recordset()
+
+        # Crear plantilla de cotización de prueba si no existe
+        template = self.env['sale.order.template'].create({
+            'name': 'Plantilla Solar Test',
+        })
+
+        wizard = self.env['solar.quote.proposal.wizard'].create({
+            'solar_quote_id': quote.id,
+            'template_id': template.id,
+        })
+        
+        wizard.action_generate()
+
+        # Verificar que se creó el pedido y que contiene la línea esperada
+        self.assertTrue(quote.sale_order_id)
+        sale_order = quote.sale_order_id
+        
+        # Encontrar la línea del producto solar configurado
+        solar_line = sale_order.order_line.filtered(lambda l: l.product_id == product)
+        self.assertTrue(solar_line)
+        self.assertEqual(solar_line.product_uom_qty, 1.0)
+        self.assertEqual(solar_line.price_unit, quote.investment)
+        
+        expected_desc = f'Sistema Solar de {quote.plant_size} kWp con generación mensual de {quote.generation_monthly} kWh'
+        self.assertEqual(solar_line.name, expected_desc)

@@ -27,6 +27,23 @@ class SolarQuoteProposalWizard(models.TransientModel):
         if hasattr(sale_order, '_onchange_sale_order_template_id'):
             sale_order._onchange_sale_order_template_id()
 
+        # Obtener configuración de solar.config
+        config = self.env['solar.config'].get_config()
+
+        # Generar descripción a partir de la plantilla
+        description = config.description_template or ''
+        description = description.replace('[pppp]', str(quote.plant_size))
+        description = description.replace('[gggg]', str(quote.generation_monthly))
+
+        # Crear la línea del pedido de venta
+        self.env['sale.order.line'].create({
+            'order_id': sale_order.id,
+            'product_id': config.product_id.id,
+            'name': description,
+            'price_unit': quote.investment,
+            'product_uom_qty': 1.0,
+        })
+
         quote.sale_order_id = sale_order.id
 
         # 2. Generar el PDF usando el motor de reportes de Odoo
