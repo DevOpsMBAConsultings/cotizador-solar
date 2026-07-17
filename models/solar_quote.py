@@ -151,16 +151,19 @@ class SolarQuote(models.Model):
                 if theoretical_investment < min_price:
                     rec.investment = min_price
                     rec.is_min_price_applied = True
-                    rec.plant_size = min_plant_size
+                    config = self.env['solar.config'].get_config()
+                    rec.plant_size = (config.min_panel_count * config.default_panel_watts) / 1000.0
                     rec.is_min_plant_applied = True
+                    rec.generation_monthly = rec.plant_size * 3.5 * 30.0
+                    rec.generation_daily = rec.generation_monthly / 30.0
                 else:
                     rec.investment = theoretical_investment
                     rec.is_min_price_applied = False
                     rec.plant_size = theoretical_plant_size
                     rec.is_min_plant_applied = False
+                    rec.generation_daily = rec.plant_size * hsp
+                    rec.generation_monthly = rec.generation_daily * 30.0
 
-                rec.generation_daily = rec.plant_size * hsp
-                rec.generation_monthly = rec.generation_daily * 30.0
                 rec.generation_yearly = rec.generation_monthly * 12.0
                 rec.panel_count = int(abs((rec.plant_size * 1000.0) / p_watts))
                 
@@ -251,7 +254,7 @@ class SolarQuote(models.Model):
             'order_id': sale_order.id,
             'product_id': config.product_id.id,
             'name': description,
-            'price_unit': self.investment,
+            'price_unit': round(self.investment, 2),
             'product_uom_qty': 1.0,
         })
 

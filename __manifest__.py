@@ -17,7 +17,7 @@
     'support': "ventas@mbaconsultings.com",
     'license': "AGPL-3",
     'category': 'Sales',
-    'version': '18.0.1.0.16',
+    'version': '18.0.1.0.17',
     'depends': ['base', 'sale', 'mail', 'sale_management'],
     'data': [
         'security/security.xml',

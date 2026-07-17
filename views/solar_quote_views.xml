@@ -229,6 +229,8 @@
                         <group string="Valores por Defecto Racionales">
                             <field name="quick_price"/>
                             <field name="quick_min_price"/>
+                            <field name="min_panel_count"/>
+                            <field name="default_panel_watts"/>
                         </group>
                         <group string="Configuración de Cotización Dinámica">
                             <field name="product_id"/>
