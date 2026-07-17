@@ -230,6 +230,10 @@
                             <field name="quick_price"/>
                             <field name="quick_min_price"/>
                         </group>
+                        <group string="Configuración de Cotización Dinámica">
+                            <field name="product_id"/>
+                            <field name="description_template"/>
+                        </group>
                     </group>
                 </sheet>
             </form>
