@@ -261,8 +261,10 @@ class SolarQuote(models.Model):
         self.sale_order_id = sale_order.id
 
         # Renderizar el PDF de la propuesta en memoria
-        report = self.env.ref('cotizador_solar.action_report_solar_proposal')
-        pdf_content, content_type = report._render_qweb_pdf(res_ids=self.ids)
+        pdf_content, content_type = self.env['ir.actions.report']._render_qweb_pdf(
+            'cotizador_solar.action_report_solar_proposal', 
+            res_ids=self.ids
+        )
 
         # Crear adjunto
         attachment = self.env['ir.attachment'].create({
