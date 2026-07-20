@@ -68,8 +68,8 @@ class SolarQuote(models.Model):
 
     # Resultados e Inteligencia de Consumo (Calculados)
     total_yearly_consumption = fields.Integer(string='Consumo Total (Año)', compute='_compute_consumption_stats', store=True)
-    avg_monthly_consumption = fields.Integer(string='Consumo Mensual Promedio', compute='_compute_consumption_stats', store=True)
-    avg_daily_consumption = fields.Integer(string='Consumo Diario Promedio', compute='_compute_consumption_stats', store=True)
+    avg_monthly_consumption = fields.Float(string='Consumo Mensual Promedio', compute='_compute_consumption_stats', store=True, digits=(16, 2))
+    avg_daily_consumption = fields.Float(string='Consumo Diario Promedio', compute='_compute_consumption_stats', store=True, digits=(16, 4))
     peak_consumption = fields.Integer(string='Consumo Pico (Max)', compute='_compute_consumption_stats', store=True)
     min_consumption = fields.Integer(string='Consumo Mínimo (Min)', compute='_compute_consumption_stats', store=True)
 
@@ -111,8 +111,8 @@ class SolarQuote(models.Model):
             ]
             total = sum(consumptions)
             rec.total_yearly_consumption = total
-            rec.avg_monthly_consumption = int(round(total / 12.0))
-            rec.avg_daily_consumption = int(round((total / 12.0) / 30.0))
+            rec.avg_monthly_consumption = total / 12.0
+            rec.avg_daily_consumption = (total / 12.0) / 30.0
             rec.peak_consumption = max(consumptions) if consumptions else 0
             rec.min_consumption = min(consumptions) if consumptions else 0
 
