@@ -10,6 +10,8 @@ class SolarConfig(models.Model):
     quick_min_price = fields.Float(string='Precio Mínimo Rápido por Defecto', default=3500.0, required=True)
     min_panel_count = fields.Integer(string='Cantidad de paneles mínimos', default=8)
     default_panel_watts = fields.Integer(string='Tamaño de panel por defecto', default=590)
+    default_efficiency = fields.Float(string='Eficiencia del Sistema (%) por defecto', default=100.0, help="Eficiencia global del sistema (ej. 80 para 80%)")
+    google_api_key = fields.Char(string='Google Gemini API Key', help="Clave de API para extraer el consumo de la factura mediante Inteligencia Artificial.")
     product_id = fields.Many2one(
         'product.product', 
         string='Producto', 

@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 import base64
+import json
+import requests
 from odoo import models, fields, api, _
 from odoo.exceptions import UserError
 
@@ -47,6 +49,9 @@ class SolarQuote(models.Model):
     def _default_quick_min_price(self):
         return self.env['solar.config'].get_config().quick_min_price
 
+    def _default_advanced_efficiency(self):
+        return self.env['solar.config'].get_config().default_efficiency or 100.0
+
     # Configuración Rápida
     quick_hsp = fields.Float(string='Radiación (HSP) Rápida', default=3.5)
     quick_price = fields.Float(string='Costo por Watt Rápido', default=_default_quick_price)
@@ -56,7 +61,7 @@ class SolarQuote(models.Model):
 
     # Configuración Técnica / Avanzada
     advanced_hsp = fields.Float(string='Radiación (HSP) Avanzada', default=3.5)
-    advanced_efficiency = fields.Float(string='Eficiencia (%)', default=100.0)
+    advanced_efficiency = fields.Float(string='Eficiencia (%)', default=_default_advanced_efficiency)
     advanced_panel_watts = fields.Float(string='Watts del Panel Avanzado', default=600.0)
     advanced_panel_count = fields.Integer(string='Cantidad de Módulos', default=8)
     pricing_mode = fields.Selection([
@@ -86,6 +91,10 @@ class SolarQuote(models.Model):
     generation_daily = fields.Float(string='Generación Diaria (kWh)', compute='_compute_solar_calculations', store=True)
     generation_monthly = fields.Float(string='Generación Mensual (kWh)', compute='_compute_solar_calculations', store=True)
     generation_yearly = fields.Float(string='Generación Anual (kWh)', compute='_compute_solar_calculations', store=True)
+
+    # Integración Inteligencia Artificial
+    invoice_file = fields.Binary(string='Factura Adjunta', attachment=True)
+    invoice_file_name = fields.Char(string='Nombre del Archivo')
 
     # Campo técnico para relacionar la cotización comercial creada
     sale_order_id = fields.Many2one('sale.order', string='Pedido de Venta Generado', readonly=True, tracking=True)
@@ -289,3 +298,94 @@ class SolarQuote(models.Model):
             'view_mode': 'form',
             'target': 'current',
         }
+
+    def action_analyze_invoice(self):
+        """ Envía la factura a Google Gemini para extraer el consumo mensual """
+        self.ensure_one()
+        if not self.invoice_file:
+            raise UserError(_("Por favor, adjunte un archivo de factura primero."))
+            
+        config = self.env['solar.config'].get_config()
+        api_key = config.google_api_key
+        
+        if not api_key:
+            raise UserError(_("La API Key de Google no está configurada. Por favor configúrela en los ajustes del Cotizador Solar."))
+
+        # Extraer mimetype básico según la extensión del archivo
+        mime_type = "application/pdf"
+        if self.invoice_file_name:
+            ext = self.invoice_file_name.lower().split('.')[-1]
+            if ext in ['png', 'jpg', 'jpeg']:
+                mime_type = f"image/{'jpeg' if ext == 'jpg' else ext}"
+            elif ext != 'pdf':
+                raise UserError(_("Formato no soportado. Por favor suba un PDF, PNG o JPG."))
+
+        # Preparar el prompt estructurado
+        prompt = (
+            "Analiza la siguiente factura de energía eléctrica. Extrae el historial de consumo de energía (generalmente en kWh). "
+            "Devuelve un objeto JSON estrictamente formateado (sin markdown) con las siguientes claves: "
+            "'consumption_m1' (consumo del mes actual/más reciente), "
+            "'consumption_m2' (mes anterior), "
+            "'consumption_m3', 'consumption_m4', 'consumption_m5', 'consumption_m6', "
+            "hasta donde haya datos en el gráfico/tabla de historial. "
+            "Si no encuentras datos para un mes, asígnale el valor 0."
+        )
+
+        url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={api_key}"
+        
+        headers = {
+            "Content-Type": "application/json"
+        }
+        
+        payload = {
+            "contents": [{
+                "parts": [
+                    {"text": prompt},
+                    {
+                        "inline_data": {
+                            "mime_type": mime_type,
+                            "data": self.invoice_file.decode('utf-8')
+                        }
+                    }
+                ]
+            }],
+            "generationConfig": {
+                "response_mime_type": "application/json",
+                "temperature": 0.0
+            }
+        }
+
+        try:
+            response = requests.post(url, headers=headers, json=payload, timeout=30)
+            response.raise_for_status()
+        except requests.exceptions.RequestException as e:
+            raise UserError(_("Error al comunicarse con la API de Google: %s" % str(e)))
+
+        data = response.json()
+        
+        try:
+            text_response = data['candidates'][0]['content']['parts'][0]['text']
+            json_data = json.loads(text_response)
+        except (KeyError, IndexError, json.JSONDecodeError):
+            raise UserError(_("Error al procesar la respuesta de la Inteligencia Artificial. La estructura no es la esperada."))
+
+        # Asignar los valores extraídos al modelo
+        self.consumption_m1 = json_data.get('consumption_m1', 0)
+        self.consumption_m2 = json_data.get('consumption_m2', 0)
+        self.consumption_m3 = json_data.get('consumption_m3', 0)
+        self.consumption_m4 = json_data.get('consumption_m4', 0)
+        self.consumption_m5 = json_data.get('consumption_m5', 0)
+        self.consumption_m6 = json_data.get('consumption_m6', 0)
+        
+        # Opcional: llenar hasta 12 meses si se solicita en el prompt y vienen en el JSON
+        self.consumption_m7 = json_data.get('consumption_m7', 0)
+        self.consumption_m8 = json_data.get('consumption_m8', 0)
+        self.consumption_m9 = json_data.get('consumption_m9', 0)
+        self.consumption_m10 = json_data.get('consumption_m10', 0)
+        self.consumption_m11 = json_data.get('consumption_m11', 0)
+        self.consumption_m12 = json_data.get('consumption_m12', 0)
+        
+        # Notificar éxito en el chatter
+        self.message_post(body=_("La factura fue analizada con éxito por IA. Consumos actualizados."))
+
+

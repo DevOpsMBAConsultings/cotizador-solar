@@ -32,12 +32,18 @@
                             string="Generar Propuesta" 
                             class="oe_highlight"
                             icon="fa-file-pdf-o"/>
+                    <button name="action_analyze_invoice" 
+                            type="object" 
+                            string="Analizar Factura con IA" 
+                            class="oe_highlight"
+                            invisible="not invoice_file"
+                            icon="fa-magic"/>
                     <button name="action_auto_size_advanced"
                             type="object"
                             string="Auto-Ajustar (100% Cobertura)"
                             class="btn-secondary"
                             invisible="mode != 'advanced'"
-                            icon="fa-magic"/>
+                            icon="fa-calculator"/>
                 </header>
                 <sheet>
                     <div class="oe_button_box" name="button_box">
@@ -68,6 +74,8 @@
                                 <field name="start_month" class="oe_inline"/>
                                 <field name="start_year" class="oe_inline" placeholder="Año"/>
                             </div>
+                            <field name="invoice_file" filename="invoice_file_name" widget="binary"/>
+                            <field name="invoice_file_name" invisible="1"/>
                         </group>
                     </group>
 
@@ -231,10 +239,17 @@
                             <field name="quick_min_price"/>
                             <field name="min_panel_count"/>
                             <field name="default_panel_watts"/>
+                            <field name="default_efficiency"/>
                         </group>
                         <group string="Configuración de Cotización Dinámica">
                             <field name="product_id"/>
                             <field name="description_template"/>
+                        </group>
+                        <group string="Inteligencia Artificial (IA)" colspan="2">
+                            <field name="google_api_key" password="True"/>
+                            <div colspan="2" class="text-muted">
+                                Configure su API Key de Google (Gemini) para habilitar la extracción automática de consumos mensuales desde archivos adjuntos en el cotizador solar.
+                            </div>
                         </group>
                     </group>
                 </sheet>
