@@ -357,13 +357,30 @@ class SolarQuote(models.Model):
 
         # Preparar el prompt estructurado
         prompt = (
-            "Analiza la siguiente factura de energía eléctrica. Extrae el historial de consumo de energía (generalmente en kWh). "
-            "Devuelve un objeto JSON estrictamente formateado (sin markdown) con las siguientes claves: "
-            "'consumption_m1' (consumo del mes actual/más reciente), "
-            "'consumption_m2' (mes anterior), "
-            "'consumption_m3', 'consumption_m4', 'consumption_m5', 'consumption_m6', "
-            "hasta donde haya datos en el gráfico/tabla de historial. "
-            "Si no encuentras datos para un mes, asígnale el valor 0."
+            "Analiza la siguiente factura de energía eléctrica. Extrae la información requerida en un objeto JSON sin markdown:\n"
+            "1. Ubica la tabla o gráfico de 'HISTORICO DE CONSUMO' (historial de consumos de kWh).\n"
+            "2. Identifica los meses y años de los consumos registrados (normalmente hay hasta 12 meses).\n"
+            "3. Ordena los datos estrictamente en ORDEN CRONOLÓGICO, desde el mes MÁS ANTIGUO hasta el mes MÁS RECIENTE (ejemplo: Abril 2025 -> Mayo 2025 -> ... -> Marzo 2026).\n"
+            "4. Devuelve el JSON con la siguiente estructura exacta:\n"
+            "{\n"
+            "  \"start_month_index\": <índice de 0 a 11 del mes MÁS ANTIGUO de la secuencia; 0=Enero, 1=Febrero, 2=Marzo, 3=Abril, 4=Mayo, 5=Junio, 6=Julio, 7=Agosto, 8=Septiembre, 9=Octubre, 10=Noviembre, 11=Diciembre>,\n"
+            "  \"start_year\": <año entero de 4 dígitos del mes MÁS ANTIGUO de la secuencia, ej. 2025>,\n"
+            "  \"consumption_m1\": <consumo kWh del mes MÁS ANTIGUO>,\n"
+            "  \"consumption_m2\": <consumo kWh del 2º mes>,\n"
+            "  \"consumption_m3\": <consumo kWh del 3er mes>,\n"
+            "  \"consumption_m4\": <consumo kWh del 4º mes>,\n"
+            "  \"consumption_m5\": <consumo kWh del 5º mes>,\n"
+            "  \"consumption_m6\": <consumo kWh del 6º mes>,\n"
+            "  \"consumption_m7\": <consumo kWh del 7º mes>,\n"
+            "  \"consumption_m8\": <consumo kWh del 8º mes>,\n"
+            "  \"consumption_m9\": <consumo kWh del 9º mes>,\n"
+            "  \"consumption_m10\": <consumo kWh del 10º mes>,\n"
+            "  \"consumption_m11\": <consumo kWh del 11º mes>,\n"
+            "  \"consumption_m12\": <consumo kWh del mes MÁS RECIENTE>,\n"
+            "  \"medidor\": <número de medidor si está presente en la factura, de lo contrario null>,\n"
+            "  \"nac\": <número de cuenta, NAC o NIC si está presente en la factura, de lo contrario null>\n"
+            "}\n"
+            "Si algún mes de los 12 no está disponible, asigna 0 en su lugar."
         )
 
         url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={api_key}"
@@ -404,15 +421,25 @@ class SolarQuote(models.Model):
         except (KeyError, IndexError, json.JSONDecodeError):
             raise UserError(_("Error al procesar la respuesta de la Inteligencia Artificial. La estructura no es la esperada."))
 
-        # Asignar los valores extraídos al modelo
+        # Asignar mes y año de inicio si están presentes
+        if 'start_month_index' in json_data and json_data['start_month_index'] is not None:
+            self.start_month = str(int(json_data['start_month_index']))
+        if 'start_year' in json_data and json_data['start_year']:
+            self.start_year = int(json_data['start_year'])
+
+        # Asignar medidor y NAC si vienen en la factura y no han sido ingresados manualmente
+        if json_data.get('medidor') and not self.medidor:
+            self.medidor = str(json_data['medidor'])
+        if json_data.get('nac') and not self.nac:
+            self.nac = str(json_data['nac'])
+
+        # Asignar los consumos en estricto orden cronológico (Mes 1 = Más Antiguo, Mes 12 = Más Reciente)
         self.consumption_m1 = json_data.get('consumption_m1', 0)
         self.consumption_m2 = json_data.get('consumption_m2', 0)
         self.consumption_m3 = json_data.get('consumption_m3', 0)
         self.consumption_m4 = json_data.get('consumption_m4', 0)
         self.consumption_m5 = json_data.get('consumption_m5', 0)
         self.consumption_m6 = json_data.get('consumption_m6', 0)
-        
-        # Opcional: llenar hasta 12 meses si se solicita en el prompt y vienen en el JSON
         self.consumption_m7 = json_data.get('consumption_m7', 0)
         self.consumption_m8 = json_data.get('consumption_m8', 0)
         self.consumption_m9 = json_data.get('consumption_m9', 0)
@@ -421,6 +448,6 @@ class SolarQuote(models.Model):
         self.consumption_m12 = json_data.get('consumption_m12', 0)
         
         # Notificar éxito en el chatter
-        self.message_post(body=_("La factura fue analizada con éxito por IA. Consumos actualizados."))
+        self.message_post(body=_("La factura fue analizada con éxito por IA. Consumos (cronológicos) y periodo de inicio (Mes/Año) actualizados."))
 
 
