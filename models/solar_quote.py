@@ -104,7 +104,42 @@ class SolarQuote(models.Model):
         for vals in vals_list:
             if vals.get('name', _('Nuevo')) == _('Nuevo'):
                 vals['name'] = self.env['ir.sequence'].next_by_code('solar.quote') or _('Nuevo')
-        return super().create(vals_list)
+        records = super().create(vals_list)
+        for rec in records:
+            if rec.invoice_file:
+                rec._attach_invoice_file_to_chatter()
+        return records
+
+    def write(self, vals):
+        res = super().write(vals)
+        if 'invoice_file' in vals and vals['invoice_file']:
+            for rec in self:
+                rec._attach_invoice_file_to_chatter()
+        return res
+
+    def _attach_invoice_file_to_chatter(self):
+        for rec in self:
+            if not rec.invoice_file:
+                continue
+            filename = rec.invoice_file_name or _("Factura_Electrica.pdf")
+            existing = self.env['ir.attachment'].search([
+                ('res_model', '=', 'solar.quote'),
+                ('res_id', '=', rec.id),
+                ('name', '=', filename),
+                ('res_field', '=', False),
+            ], limit=1)
+            if not existing:
+                attachment = self.env['ir.attachment'].create({
+                    'name': filename,
+                    'type': 'binary',
+                    'datas': rec.invoice_file,
+                    'res_model': 'solar.quote',
+                    'res_id': rec.id,
+                })
+                rec.message_post(
+                    body=_("Factura subida y adjuntada al expediente: <b>%s</b>") % filename,
+                    attachment_ids=[attachment.id]
+                )
 
     @api.depends(
         'consumption_m1', 'consumption_m2', 'consumption_m3', 'consumption_m4',
