@@ -306,7 +306,7 @@ class SolarQuote(models.Model):
             raise UserError(_("Por favor, adjunte un archivo de factura primero."))
             
         config = self.env['solar.config'].get_config()
-        api_key = config.google_api_key
+        api_key = (config.google_api_key or '').strip()
         
         if not api_key:
             raise UserError(_("La API Key de Google no está configurada. Por favor configúrela en los ajustes del Cotizador Solar."))
@@ -331,7 +331,7 @@ class SolarQuote(models.Model):
             "Si no encuentras datos para un mes, asígnale el valor 0."
         )
 
-        url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={api_key}"
+        url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={api_key}"
         
         headers = {
             "Content-Type": "application/json"
